@@ -3,9 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use stdClass;
 
 class ClientController extends Controller
 {
+    
+    
+    
     /**
      * Display a listing of the resource.
      *
@@ -13,7 +17,11 @@ class ClientController extends Controller
      */
     public function index()
     {
-        //
+        //..pegar os clientes
+        $clients = $this->createClients();
+
+        //..retorna a view passando o parâmetro 
+        return view('client.index')->with('clients', $clients);
     }
 
     /**
@@ -81,4 +89,24 @@ class ClientController extends Controller
     {
         //
     }
+
+    public function createClients()
+    {
+        $clients = []; //..cria um array vazio
+        
+        $client = new stdClass; //..cria um novo objeto standard
+        $client->id = 1;
+        $client->name = 'Luke Skywalker';
+        $client->age = '18';
+        $clients[] = $client; //..adiciona o objeto ao array
+
+        $client = new stdClass;
+        $client->id = 2;
+        $client->name = 'Han Solo';
+        $client->age = '25';
+        $clients[] = $client;
+
+        return $clients; //..retorna os clientes
+    }
+
 }
