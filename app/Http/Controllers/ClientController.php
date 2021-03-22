@@ -85,7 +85,14 @@ class ClientController extends Controller
      */
     public function edit($id)
     {
-        //
+        //retornar o id do client
+        $clients = session("clients");
+        $client = $this->arrayFind($clients, $id);
+        if ($client) {
+            return view("client.edit")->with("client", $client);
+        } else {
+            abort(404);
+        }
     }
 
     /**
@@ -97,7 +104,16 @@ class ClientController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        //recuperar o objeto e atualizar esse obj
+        $clients = session("clients");
+        //pega o indice do objeto que vai ser atualizado
+        $i = $this->arraySearch($clients, "id", $id);
+        //metodo que atualiza os dados do código
+        $clients[$i]->name = $request->input("name");
+        $clients[$i]->age = $request->input("age");
+        //..atualiza a sessao com os novos dados
+        session(["clients" => $clients]);
+        return redirect(route("client.index"));
     }
 
     /**
@@ -109,6 +125,16 @@ class ClientController extends Controller
     public function destroy($id)
     {
         //
+        $clients = session("clients");
+        $i = $this->arraySearch($clients, "id", $id);
+
+        if ($i >= 0) {
+            unset($clients[$i]);
+            $clients = array_values($clients);
+            session(["clients" => $clients]);
+
+            return redirect(route("client.index"));
+        }
     }
 
     public function createClients()

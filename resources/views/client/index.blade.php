@@ -14,7 +14,13 @@
                     <td>{{ $client->age }}</td>
                     <td><button> <a href="{{ route('client.show', $client->id) }}">Mostrar</a> </button></td>
                     <td><button> <a href="{{ route('client.edit', $client->id) }}">Editar</a> </button></td>
-                    <td><button> <a href="{{ route('client.destroy', $client->id) }}">Excluir</a> </button></td>
+                    <td>
+                        <form method="post" action="{{ route('client.destroy', $client->id) }}">
+                            @csrf
+                            @method('DELETE')
+                            <input type="submit" value="Excluir">
+                        </form>
+                    </td>
                 </tr>   
             @endforeach
         @else
@@ -24,4 +30,3 @@
         @endif
     </table>
 @endsection
-
