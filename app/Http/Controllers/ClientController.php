@@ -6,13 +6,15 @@ use Illuminate\Http\Request;
 use stdClass;
 
 class ClientController extends Controller
-{
+{ 
+    
     public function __construct()
     {
-        if (!session("clients")) {
-            session(["clients" => $this->createClients()]);
+        if(!session('clients')){
+            session(['clients' => $this->createClients()]);
         }
     }
+    
     /**
      * Display a listing of the resource.
      *
@@ -20,7 +22,8 @@ class ClientController extends Controller
      */
     public function index()
     {
-        return view("client.index")->with("clients", session("clients"));
+       return view('client.index')
+            ->with('clients', session('clients'));
     }
 
     /**
@@ -30,7 +33,7 @@ class ClientController extends Controller
      */
     public function create()
     {
-        return view("client.create");
+        return view('client.create');
     }
 
     /**
@@ -41,20 +44,32 @@ class ClientController extends Controller
      */
     public function store(Request $request)
     {
-        $clients = session("clients");
+        
+        $request->validate(
+            $this->getRules(), $this->getErrorMessages()
+        );
+        
+        //..recover the session data
+        $clients = session('clients');
+        //..generates an id
         $lastId = 0;
-        if ($clients) {
+        if($clients){
             $lastIndex = count($clients) - 1;
             $lastId = $clients[$lastIndex]->id;
         }
-        $c = new stdClass();
+        //..creates a new standard object
+        $c = new stdClass;
         $c->id = $lastId + 1;
-        $c->name = $request->input("name");
-        $c->age = $request->input("age");
+        $c->name = $request->input('name');
+        $c->age = $request->input('age');
 
+        //..add the newly created client into clients
         $clients[] = $c;
-        session(["clients" => $clients]);
-        return redirect(route("client.index"));
+        //..update the session data
+        session(['clients' => $clients]);
+        //..redirects the application flow to client index route
+        return redirect(route('client.index'));
+
     }
 
     /**
@@ -65,14 +80,17 @@ class ClientController extends Controller
      */
     public function show($id)
     {
-        //...recupera os dados da sessão
-        $clients = session("clients");
-        //...procura o client em clientes ussando o id
+        //..recover the data from session
+        $clients = session('clients');
+
+        //..find a client in clients using the id
         $client = $this->arrayFind($clients, $id);
-        //
-        if ($client) {
-            return view("client.show")->with("client", $client);
-        } else {
+
+        //..if a client found, retuns a view with client data
+        if($client){
+            return view('client.show')->with('client', $client);
+        } else { 
+            //..else, return an abort
             abort(404);
         }
     }
@@ -85,12 +103,17 @@ class ClientController extends Controller
      */
     public function edit($id)
     {
-        //retornar o id do client
-        $clients = session("clients");
+        //..retry the clients from session
+        $clients = session('clients');
+
+        //..search the client using the id
         $client = $this->arrayFind($clients, $id);
-        if ($client) {
-            return view("client.edit")->with("client", $client);
-        } else {
+
+        //..if client exists, return the view with data to be updated
+        if($client){        
+            return view('client.edit')->with('client', $client);
+        } else { 
+            //..else, show error 404 - not found
             abort(404);
         }
     }
@@ -104,16 +127,22 @@ class ClientController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //recuperar o objeto e atualizar esse obj
-        $clients = session("clients");
-        //pega o indice do objeto que vai ser atualizado
-        $i = $this->arraySearch($clients, "id", $id);
-        //metodo que atualiza os dados do código
-        $clients[$i]->name = $request->input("name");
-        $clients[$i]->age = $request->input("age");
-        //..atualiza a sessao com os novos dados
-        session(["clients" => $clients]);
-        return redirect(route("client.index"));
+        //..retry the clients from session
+        $clients = session('clients');
+        
+        //..get the index of object that will be updated
+        $i = $this->arraySearch($clients, 'id', $id);
+        
+        //..updates the data of object 
+        $clients[$i]->name = $request->input('name');
+        $clients[$i]->age = $request->input('age');
+        
+        //..updates the session with new data
+        session(['clients' => $clients]);
+        
+        //..redirects the browser to index route
+        return redirect(route('client.index'));
+
     }
 
     /**
@@ -124,66 +153,72 @@ class ClientController extends Controller
      */
     public function destroy($id)
     {
-        //
-        $clients = session("clients");
-        $i = $this->arraySearch($clients, "id", $id);
-
-        if ($i >= 0) {
+        //..retry the clients from session
+        $clients = session('clients');
+        
+        //..gets the id of object using the id
+        $i = $this->arraySearch($clients, 'id', $id);
+        
+        //..if exists the id, deletes the object
+        if($i >= 0){
             unset($clients[$i]);
             $clients = array_values($clients);
-            session(["clients" => $clients]);
-
-            return redirect(route("client.index"));
+            session(['clients' => $clients]);
         }
+        //..redirect to index route to show the updated list of clients
+        return redirect(route('client.index'));
     }
 
     public function createClients()
     {
         $clients = []; //..cria um array vazio
-
-        $client = new stdClass(); //..cria um novo objeto standard
+        
+        $client = new stdClass; //..cria um novo objeto standard
         $client->id = 1;
-        $client->name = "Luke Skywalker";
-        $client->age = "18";
+        $client->name = 'Luke Skywalker';
+        $client->age = '18';
         $clients[] = $client; //..adiciona o objeto ao array
 
-        $client = new stdClass();
+        $client = new stdClass;
         $client->id = 2;
-        $client->name = "Han Solo";
-        $client->age = "25";
+        $client->name = 'Han Solo';
+        $client->age = '25';
         $clients[] = $client;
 
         return $clients; //..retorna os clientes
     }
+
     /**
-     * Procura por um objeto dentro de um array
+     * Search for an object in array collection
      * @param array array The array
-     * @param int id an in
-     * @return object | null
+     * @param int id An id
+     * @return object 
      */
     public function arrayFind($array, $id)
     {
-        if ($array) {
-            foreach ($array as $obj) {
-                if ($obj->id == $id) {
+        if($array){
+            foreach($array as $obj){
+                if($obj->id == $id){
                     return $obj;
                 }
             }
             return null;
         }
     }
+
     /**
-     * Retorna a index de um objeto do array ou -1, se o objeto não existir
-     * @param array array do array
-     * @param string key o key usado no search
-     * @param int search o valor do search
+     * Returns the index of an object from array or -1, if the object doesn't exist.
+     * @param array array The array
+     * @param string key The key used to search
+     * @param int search The value to search
+     * 
      */
     public function arraySearch($array, $key, $search)
     {
-        if ($array) {
+        if($array){
             $i = 0;
-            foreach ($array as $obj) {
-                if ($obj->$key == $search) {
+            foreach($array as $obj){
+                if($obj->$key == $search){
                     return $i;
                 }
                 $i++;
@@ -191,4 +226,25 @@ class ClientController extends Controller
             return -1;
         }
     }
+
+    /**
+     * Returns the validation rules
+     */
+    public function getRules(){
+        return [
+            'name' => 'string|required|min:5|max:30',
+            'age' => 'required|numeric|between:18,30'
+        ];    
+    }
+
+    /**
+     * Returns the error messages.
+     */
+    public function getErrorMessages(){
+        return [
+            'name.*' => 'O nome deve ter entre 5 e 30 caracteres',
+            'age.*' => 'A idade deve ser um número entre 18 e 30'
+        ];
+    }
+
 }
