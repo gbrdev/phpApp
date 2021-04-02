@@ -14,10 +14,13 @@ class CreateClientsTable extends Migration
     public function up()
     {
         Schema::create("clients", function (Blueprint $table) {
+            //..creates an id field already as primary key
             $table->id();
-            $table->string("name", 100);
+            //..creates a string field with length 50
+            $table->string("name", 50);
+            //creates an integer field
             $table->integer("age");
-            // ele gera dois campos que controlam as mudanças
+            //..generates two time stamp fields to control changing
             $table->timestamps();
         });
     }
