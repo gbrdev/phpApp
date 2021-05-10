@@ -24,7 +24,7 @@ Existem várias opções interessantes, veja alguns exemplos:
 \h :: lista os comandos SQL
 \h comando :: apresenta detalhes sobre o comando
 
-### Eloquent -> Thinker
+### Eloquent com -> Thinker
 
 Definindo um model
 $c = new Client();
@@ -54,3 +54,5 @@ $clients = Client::where('name', 'like', 'G%')->orderBy('name')->get();
 Exclusão
 $c = Client::find(id);
 $c->delete();
+
+
